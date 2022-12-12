@@ -5,6 +5,7 @@ const socket = io('http://localhost:3000');
 
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
+  const [messages, setMessages] = useState([]);
   useEffect(() => {
     socket.on('connect', () => {
       setIsConnected(true);
@@ -13,6 +14,10 @@ function App() {
     socket.on('disconnect', () => {
       setIsConnected(false);
     });
+
+    socket.on('messages', (messages) => {
+      setMessages(messages)
+    })
   })
   return (
     <>
@@ -20,6 +25,20 @@ function App() {
         <h1>BD Chat</h1>
       </div>
       <div>{isConnected ? 'Online' : 'Offline'}</div>
+      {Boolean(messages.length) && <div>
+        {messages
+          .map(({
+            id,
+            time,
+            user,
+            text
+          }) => <div key={id}>
+              {time.slice(-10, -5)} - 
+              {user} - 
+              {text}
+            </div>)
+        }
+      </div>}
     </>
   );
 }
