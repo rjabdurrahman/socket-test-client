@@ -1,5 +1,5 @@
 import { useFormik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
 const socket = io(process.env.REACT_APP_SOCKET_SOURCE);
@@ -7,22 +7,27 @@ const socket = io(process.env.REACT_APP_SOCKET_SOURCE);
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [messages, setMessages] = useState([]);
-  socket.on('connect', () => {
-    setIsConnected(true);
-  });
 
-  socket.on('disconnect', () => {
-    setIsConnected(false);
-  });
+  useEffect(() => {
+    socket.on('connect', () => {
+      setIsConnected(true);
+    });
 
-  socket.on('messages', (messages) => {
-    setMessages(messages)
-  })
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+    });
 
-  socket.on('message', (msg) => {
-    console.log(msg)
-    setMessages([...messages, msg])
-  })
+    socket.on('messages', (messages) => {
+      setMessages(messages)
+    })
+
+    socket.on('message', (msg) => {
+      console.log(msg)
+      setMessages((preMessages) => {
+        return [...preMessages, msg]
+      })
+    })
+  }, [setMessages])
 
   const {
     values,
